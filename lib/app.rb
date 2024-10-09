@@ -1,10 +1,37 @@
-require 'dotenv'# Appelle la gem Dotenv
+require 'http'
+require 'json'
+require 'dotenv'
 
-Dotenv.load # Ceci appelle le fichier .env (situé dans le même dossier que celui d'où tu exécute app.rb)
-# et grâce à la gem Dotenv, on importe toutes les données enregistrées dans un hash ENV
+Dotenv.load
 
-# Il est ensuite très facile d'appeler les données du hash ENV, par exemple là je vais afficher le contenu de la clé OPENAI_API
-puts ENV['OPENAI_API']
+api_key = ENV["OPENAI_API_KEY"]
+url = "https://api.openai.com/v1/completions"
 
-#Autre exemple 
-puts ENV['CHATGPT_API_SECRET']
+headers = {
+  "Content-Type" => "application/json",
+  "Authorization" => "Bearer #{api_key}"
+}
+
+loop do
+
+print "> "
+text = gets.chomp
+
+    data = {
+    "prompt" => text,
+    "max_tokens" => 25,
+    "temperature" => 0,
+    "n" => 1,
+    "model" => "gpt-3.5-turbo-instruct",
+    }
+
+    response = HTTP.post(url, headers: headers, body: data.to_json)
+    response_body = JSON.parse(response.body.to_s)
+    response_string = response_body['choices'][0]['text'].strip
+
+break if text == "exit"
+
+print "Rick: "
+puts response_string
+
+end
